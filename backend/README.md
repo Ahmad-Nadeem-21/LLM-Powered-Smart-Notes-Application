@@ -2,7 +2,7 @@
 
 A FastAPI-based REST API backend for an intelligent document processing and note generation application. This backend handles file uploads, text extraction from multiple formats (PDF, DOCX, TXT), and AI-powered note generation using local LLM integration via Ollama.
 
-## 🚀 Features
+## Features
 
 - **Multi-format File Support**: Upload and process PDF, DOCX, and TXT files
 - **Intelligent Text Extraction**: Automatic text extraction from various document formats
@@ -12,7 +12,7 @@ A FastAPI-based REST API backend for an intelligent document processing and note
 - **PostgreSQL Integration**: Robust database storage for files and generated notes
 - **Map-Reduce Processing**: Efficient handling of large documents through chunking and summarization
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: FastAPI 0.127+
 - **Python**: 3.14+
@@ -24,7 +24,7 @@ A FastAPI-based REST API backend for an intelligent document processing and note
 - **Package Manager**: `uv` (modern Python package manager)
 - **Server**: Uvicorn (ASGI server)
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before running the backend, ensure you have:
 
@@ -37,7 +37,7 @@ Before running the backend, ensure you have:
    - Running on `http://localhost:11434`
 4. **uv** package manager (install via: `pip install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 
-## 🔧 Installation
+## Installation
 
 1. **Clone the repository** (if not already done):
    ```bash
@@ -60,7 +60,7 @@ Before running the backend, ensure you have:
    pip install -r requirements.txt
    ```
 
-## ⚙️ Configuration
+## Configuration
 
 1. **Create a `.env` file** in the `backend` directory:
    ```env
@@ -79,7 +79,7 @@ Before running the backend, ensure you have:
    - Default model: `llama3`
    - Request timeout: 120 seconds
 
-## 🏃 Running the Server
+## Running the Server
 
 ### Development Mode (with auto-reload):
 
@@ -102,7 +102,7 @@ Once the server is running, access:
 - **ReDoc**: `http://localhost:8000/redoc`
 - **OpenAPI JSON**: `http://localhost:8000/openapi.json`
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Base URL: `http://localhost:8000`
 
@@ -128,7 +128,7 @@ curl -X POST "http://localhost:8000/upload" \
 curl -X POST "http://localhost:8000/notes/{file_id}"
 ```
 
-## 🗄️ Database Setup
+## Database Setup
 
 The application automatically creates the necessary tables on startup:
 
@@ -157,7 +157,7 @@ CREATE DATABASE notes_db;
 
 The application will create tables automatically on first startup.
 
-## 🤖 Ollama Setup
+## Ollama Setup
 
 1. **Install Ollama**: Download from [ollama.ai](https://ollama.ai)
 
@@ -178,27 +178,8 @@ The application will create tables automatically on first startup.
 
    You should see `llama3` in the models list.
 
-## 📁 Project Structure
 
-```
-backend/
-├── app/
-│   ├── __init__.py          # Package initialization
-│   ├── app.py               # FastAPI application and routes
-│   ├── database.py           # PostgreSQL connection and queries
-│   ├── LLM_Integration.py   # Ollama client and note generation
-│   ├── schemas.py            # Pydantic models
-│   └── text_extracting.py    # File text extraction functions
-├── uploads/                  # File storage directory (auto-created)
-├── main.py                   # Application entry point
-├── pyproject.toml            # Project dependencies (uv format)
-├── requirements.txt          # Alternative dependency list
-├── uv.lock                   # Dependency lock file
-├── .env                      # Environment variables (create this)
-└── README.md                 # This file
-```
-
-## 🔍 Key Features Explained
+## Key Features Explained
 
 ### Text Extraction
 - **PDF**: Uses `pdfplumber` for page-by-page text extraction
@@ -217,7 +198,7 @@ backend/
 - Subsequent requests for the same file return cached notes instantly
 - Cache is automatically updated when notes are regenerated
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Ollama Connection Issues
 - **Error**: "Cannot connect to Ollama"
@@ -238,32 +219,9 @@ backend/
   - **Solution**: Increase `REQUEST_TIMEOUT` in `app/LLM_Integration.py`
   - Check system resources (CPU/RAM) - Ollama may be overloaded
 
-## 🧪 Development
+## Development
 
-### Running Tests
-```bash
-uv run pytest
-```
-
-### Code Formatting
-```bash
-# Using black (if installed)
-uv run black app/
-
-# Using ruff (if installed)
-uv run ruff check app/
-```
-
-### Adding New Dependencies
-```bash
-# Using uv (recommended)
-uv add package-name
-
-# Or manually edit pyproject.toml, then:
-uv sync
-```
-
-## 📝 Environment Variables
+## Environment Variables
 
 Create a `.env` file in the `backend` directory:
 
@@ -278,7 +236,7 @@ DB_PASSWORD=your_postgres_password
 # DB_USER=postgres
 ```
 
-## 🔒 Security Notes
+## Security Notes
 
 - **CORS**: Currently configured for localhost development. Update `allow_origins` in `app.py` for production.
 - **File Storage**: Files are stored in `uploads/` directory. Consider implementing file size limits and validation.
