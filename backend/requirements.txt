@@ -1,0 +1,42 @@
+# Core backend
+fastapi
+uvicorn[standard]
+
+# Environment variables
+python-dotenv
+
+# Database (PostgreSQL)
+sqlalchemy
+psycopg2-binary
+alembic
+
+# Data validation / schemas
+pydantic
+pydantic-settings
+
+# Auth & security
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# HTTP requests (for calling APIs / ML services)
+httpx
+requests
+
+# Async support
+asyncpg
+
+# Logging
+loguru
+
+# Testing
+pytest
+pytest-asyncio
+
+# Optional but VERY useful
+email-validator
+
+# Text Extracting
+
+pdfplumber
+python-docx

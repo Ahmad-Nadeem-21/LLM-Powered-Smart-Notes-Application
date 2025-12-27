@@ -1,0 +1,406 @@
+================================================================================
+PROJECT: SMART NOTES APPLICATION - FULL STACK WEB APPLICATION
+================================================================================
+
+PROJECT OVERVIEW:
+-----------------
+A full-stack web application that allows users to upload documents (PDF, DOCX, TXT) and automatically generate structured study notes using AI/LLM technology. The application features a modern React frontend and a FastAPI backend with PostgreSQL database integration and local LLM (Ollama) integration for note generation.
+
+================================================================================
+TECHNOLOGY STACK
+================================================================================
+
+BACKEND:
+--------
+- Framework: FastAPI (Python 3.14+)
+- Web Server: Uvicorn with ASGI
+- Database: PostgreSQL (psycopg2-binary driver)
+- ORM/Database Tools: SQLAlchemy, Alembic (migration support)
+- File Processing: pdfplumber (PDF), python-docx (DOCX), native text handling
+- AI/LLM Integration: Ollama (local LLM) with Llama3 model
+- HTTP Client: requests library for Ollama API calls
+- Authentication/Security: python-jose, passlib[bcrypt] (configured but not fully implemented)
+- Environment Management: python-dotenv
+- Package Management: uv (modern Python package manager)
+- API Documentation: FastAPI auto-generated OpenAPI/Swagger docs
+- CORS: Configured middleware for cross-origin requests
+
+Key Backend Dependencies:
+- fastapi>=0.127.0
+- uvicorn[standard]>=0.40.0
+- psycopg2-binary>=2.9.11
+- sqlalchemy>=2.0.45
+- pdfplumber>=0.11.8
+- python-docx>=1.2.0
+- requests>=2.32.5
+- pydantic>=2.12.5
+- alembic>=1.17.2
+
+FRONTEND:
+---------
+- Framework: React 18.3.1
+- Build Tool: Vite 6.0.0
+- Styling: Custom CSS with modern design system
+- HTTP Client: Native Fetch API
+- State Management: React Hooks (useState)
+- UI Features: File upload, loading states, error handling, responsive design
+
+Key Frontend Dependencies:
+- react: ^18.3.1
+- react-dom: ^18.3.1
+- vite: ^6.0.0
+- @vitejs/plugin-react: ^4.3.3
+
+================================================================================
+ARCHITECTURE & DESIGN PATTERNS
+================================================================================
+
+BACKEND ARCHITECTURE:
+---------------------
+- RESTful API design with CRUD operations
+- Modular structure: Separate modules for database, LLM integration, text extraction, schemas
+- Context managers for database connections (proper resource management)
+- Map-reduce pattern for LLM processing (chunking large documents)
+- Error handling with HTTPException for proper API responses
+- Startup event handlers for database initialization
+- File storage: Local filesystem storage in 'uploads' directory
+- UUID-based file identification system
+
+FRONTEND ARCHITECTURE:
+----------------------
+- Component-based React architecture
+- Separation of concerns: API layer (api.js), UI components (App.jsx), styling (styles.css)
+- State management using React hooks
+- Async/await pattern for API calls
+- Error boundary handling
+- Loading states and user feedback
+- Responsive two-panel layout design
+
+================================================================================
+API ENDPOINTS
+================================================================================
+
+BASE URL: http://localhost:8000
+
+1. GET /
+   - Root endpoint
+   - Returns welcome message
+   - Purpose: Health check
+
+2. POST /upload
+   - Upload file endpoint
+   - Request: multipart/form-data with file
+   - Response: {file_id, filename, message}
+   - Features: UUID generation, file storage, error handling
+
+3. GET /file/{file_id}
+   - Retrieve uploaded file
+   - Returns file as download
+   - Error: 404 if file not found
+
+4. PUT /file/{file_id}
+   - Update/replace existing file
+   - Request: multipart/form-data with new file
+   - Response: {file_id, filename, message}
+   - Error: 404 if file not found
+
+5. DELETE /file/{file_id}
+   - Delete uploaded file
+   - Response: {message}
+   - Error: 404 if file not found
+
+6. POST /notes/{file_id}
+   - Generate AI-powered study notes from uploaded file
+   - Response: {file_id, notes, cached}
+   - Features: Database caching, text extraction, LLM processing
+   - Errors: 400 (validation), 404 (file not found), 500 (processing error)
+
+================================================================================
+DATABASE SCHEMA
+================================================================================
+
+DATABASE: PostgreSQL (notes_db)
+PORT: 5433
+CONNECTION: psycopg2 with context managers
+
+TABLES:
+
+1. files
+   - id: SERIAL PRIMARY KEY
+   - file_id: VARCHAR(255) UNIQUE NOT NULL
+   - filename: VARCHAR(255) NOT NULL
+   - upload_time: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+2. notes
+   - id: SERIAL PRIMARY KEY
+   - file_id: VARCHAR(255) UNIQUE NOT NULL REFERENCES files(file_id) ON DELETE CASCADE
+   - content: TEXT NOT NULL
+   - model: VARCHAR(100)
+   - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+RELATIONSHIPS:
+- One-to-one relationship between files and notes
+- Cascade delete: Deleting a file deletes associated notes
+- Unique constraint on file_id in notes table (prevents duplicates)
+
+DATABASE FUNCTIONS:
+- initialize_database(): Creates tables if they don't exist
+- get_notes_by_file_id(file_id): Retrieves cached notes
+- save_notes(file_id, content, model): Saves/updates notes with conflict resolution
+
+================================================================================
+KEY FEATURES & FUNCTIONALITY
+================================================================================
+
+FILE PROCESSING:
+----------------
+- Multi-format support: PDF, DOCX, TXT
+- PDF extraction using pdfplumber (page-by-page text extraction)
+- DOCX extraction using python-docx (paragraph extraction)
+- TXT file handling with UTF-8 encoding and error tolerance
+- File validation: Checks for readable text content
+- Error handling: Clear error messages for unsupported formats
+
+AI/LLM INTEGRATION:
+-------------------
+- Local LLM integration via Ollama
+- Model: Llama3 (configurable)
+- Map-reduce summarization pattern:
+  * Large documents split into 3000-character chunks
+  * Each chunk summarized independently
+  * Summaries combined into final structured notes
+- Prompt engineering: System prompts for study note generation
+- Output format: Overview paragraph + 5-8 bullet points
+- Timeout handling: 180-second timeout for LLM requests
+- Error handling: Network errors, API errors, timeout errors
+
+CACHING SYSTEM:
+---------------
+- Database-backed caching for generated notes
+- Prevents redundant LLM processing
+- Cache indicator in API responses
+- Automatic cache invalidation on file update
+
+USER INTERFACE:
+---------------
+- Modern, clean design with gradient backgrounds
+- Two-panel layout: Upload panel (left) and Notes panel (right)
+- File upload with drag-and-drop visual feedback
+- Loading states for async operations
+- Error banners for user feedback
+- File information display (name, size, ID)
+- Notes display with formatting
+- Cache status indicators
+- Responsive design principles
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+BACKEND STRUCTURE:
+------------------
+backend/
+├── app/
+│   ├── __init__.py          # Package initialization
+│   ├── app.py               # FastAPI application, routes, CORS config
+│   ├── database.py          # PostgreSQL connection, queries, schema
+│   ├── LLM_Integration.py   # Ollama client, chunking, summarization
+│   ├── schemas.py           # Pydantic models (FileResponse)
+│   └── text_extracting.py   # PDF/DOCX/TXT extraction functions
+├── main.py                  # Application entry point (uvicorn runner)
+├── pyproject.toml           # Project dependencies (uv format)
+├── requirements.txt         # Alternative dependency list
+├── uv.lock                  # Dependency lock file
+├── uploads/                 # File storage directory
+└── README.md                # Backend documentation
+
+FRONTEND STRUCTURE:
+-------------------
+frontend/
+├── src/
+│   ├── main.jsx            # React entry point
+│   ├── App.jsx             # Main application component
+│   ├── api.js              # API client functions
+│   └── styles.css          # Global stylesheet
+├── index.html              # HTML template
+├── package.json            # NPM dependencies
+├── vite.config.mts         # Vite configuration
+└── README.md               # Frontend documentation
+
+================================================================================
+IMPLEMENTATION DETAILS
+================================================================================
+
+BACKEND IMPLEMENTATION:
+-----------------------
+1. FastAPI Application Setup:
+   - CORS middleware configured for localhost:5173 and localhost:3000
+   - Automatic API documentation at /docs
+   - Startup event for database initialization
+
+2. File Upload System:
+   - UUID-based file identification (uuid_filename.ext format)
+   - Secure file storage in uploads/ directory
+   - File streaming for memory efficiency
+   - Error handling for file operations
+
+3. Text Extraction Pipeline:
+   - Format detection based on file extension
+   - Specialized extractors for each format
+   - Text validation (empty file detection)
+   - Error handling with descriptive messages
+
+4. LLM Processing Pipeline:
+   - Text chunking algorithm (3000 char chunks)
+   - Sequential chunk processing with logging
+   - Two-stage summarization (chunk summaries + final combination)
+   - Structured prompt templates
+   - Error handling for network/API failures
+
+5. Database Operations:
+   - Context manager pattern for connection management
+   - Parameterized queries (SQL injection prevention)
+   - RealDictCursor for dictionary-like results
+   - Upsert pattern (INSERT ... ON CONFLICT UPDATE)
+
+FRONTEND IMPLEMENTATION:
+------------------------
+1. React Component Structure:
+   - Functional components with hooks
+   - State management for file, upload status, notes, errors
+   - Event handlers for file selection, upload, note generation
+
+2. API Integration:
+   - Centralized API client (api.js)
+   - Environment-based API URL configuration
+   - Error handling and response parsing
+   - URL encoding for file IDs
+
+3. User Experience:
+   - File input with visual feedback
+   - Loading states (isUploading, isGenerating)
+   - Error display with clear messages
+   - Empty states and helper text
+   - File information display
+   - Notes formatting with pre tag
+
+4. Styling:
+   - Modern CSS with CSS variables
+   - Gradient backgrounds
+   - Card-based layouts
+   - Responsive design
+   - Button states (disabled, hover)
+   - Badge components for status
+
+================================================================================
+CHALLENGES SOLVED & TECHNICAL DECISIONS
+================================================================================
+
+1. CORS Configuration:
+   - Problem: Frontend couldn't communicate with backend
+   - Solution: Implemented CORSMiddleware with proper origin whitelisting
+
+2. Package Management:
+   - Problem: Conflicting package names (docx vs python-docx)
+   - Solution: Standardized on python-docx, removed conflicting packages
+
+3. File Processing:
+   - Problem: Different file formats require different extraction methods
+   - Solution: Modular extraction functions with format detection
+
+4. Large Document Processing:
+   - Problem: LLM context limits for large documents
+   - Solution: Implemented map-reduce pattern with chunking
+
+5. Database Caching:
+   - Problem: Redundant LLM processing for same files
+   - Solution: Database-backed caching with conflict resolution
+
+6. Error Handling:
+   - Problem: Generic error messages not helpful for debugging
+   - Solution: Specific error types with descriptive messages
+
+7. File Identification:
+   - Problem: Need unique, persistent file identifiers
+   - Solution: UUID-based naming with filename preservation
+
+================================================================================
+DEPLOYMENT & RUNNING
+================================================================================
+
+BACKEND SETUP:
+--------------
+1. Install dependencies: `cd backend && uv sync`
+2. Configure database: Set DB_PASSWORD in .env file
+3. Ensure PostgreSQL is running on localhost:5433
+4. Ensure Ollama is running with llama3 model installed
+5. Run server: `uv run uvicorn app.app:app --reload`
+
+FRONTEND SETUP:
+---------------
+1. Install dependencies: `cd frontend && npm install`
+2. Configure API URL (optional): Set VITE_API_BASE_URL in .env
+3. Run dev server: `npm run dev`
+4. Access at http://localhost:5173
+
+REQUIREMENTS:
+-------------
+- Python 3.14+
+- Node.js and npm
+- PostgreSQL (port 5433)
+- Ollama with llama3 model
+- uv package manager (Python)
+
+================================================================================
+PROJECT METRICS & STATISTICS
+================================================================================
+
+- Total Backend Files: 6 Python modules
+- Total Frontend Files: 4 JavaScript/JSX files
+- API Endpoints: 6 RESTful endpoints
+- Database Tables: 2 tables with relationships
+- Supported File Formats: 3 (PDF, DOCX, TXT)
+- Lines of Code (estimated): ~500 backend, ~200 frontend
+- Dependencies: 28 Python packages, 4 npm packages
+
+================================================================================
+FUTURE ENHANCEMENTS (NOT IMPLEMENTED)
+================================================================================
+
+- User authentication and authorization
+- Multi-user support with user-specific files
+- File size limits and validation
+- Advanced error logging and monitoring
+- Docker containerization
+- Production deployment configuration
+- Unit and integration tests
+- File preview functionality
+- Notes editing capabilities
+- Export notes functionality (PDF, DOCX)
+- Multiple LLM model support
+- Streaming responses for long operations
+
+================================================================================
+TECHNICAL SKILLS DEMONSTRATED
+================================================================================
+
+- Full-stack web development (React + FastAPI)
+- RESTful API design and implementation
+- PostgreSQL database design and management
+- File processing and text extraction
+- AI/LLM integration (Ollama)
+- Modern Python development (uv, type hints, async)
+- Modern JavaScript/React development (Hooks, ES6+)
+- CORS and cross-origin request handling
+- Error handling and user feedback
+- State management in React
+- Database connection pooling and context managers
+- Map-reduce algorithm implementation
+- Prompt engineering for LLM
+- Package management (uv, npm)
+- Version control and project organization
+
+================================================================================
+END OF PROJECT DOCUMENTATION
+================================================================================
+
