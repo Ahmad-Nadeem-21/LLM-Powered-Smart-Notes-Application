@@ -8,13 +8,13 @@ An intelligent full-stack web application that automatically generates structure
 
 ## Features
 
-- 📄 **Multi-format Support**: Upload and process PDF, DOCX, and TXT files
-- 🤖 **AI-Powered Note Generation**: Generate structured study notes using local LLM (Ollama with Llama3)
-- ⚡ **Smart Caching**: Database-backed caching for instant note retrieval
-- 🎨 **Modern UI**: Beautiful, responsive React frontend with intuitive design
-- 🔄 **Map-Reduce Processing**: Efficient handling of large documents through intelligent chunking
-- 📊 **RESTful API**: Clean, well-documented API with automatic OpenAPI/Swagger documentation
-- 💾 **PostgreSQL Integration**: Robust database storage for files and generated notes
+- **Multi-format Support**: Upload and process PDF, DOCX, and TXT files
+- **AI-Powered Note Generation**: Generate structured study notes using local LLM (Ollama with Llama3)
+- **Smart Caching**: Database-backed caching for instant note retrieval
+- **Modern UI**: Beautiful, responsive React frontend with intuitive design
+- **Map-Reduce Processing**: Efficient handling of large documents through intelligent chunking
+- **RESTful API**: Clean, well-documented API with automatic OpenAPI/Swagger documentation
+- **PostgreSQL Integration**: Robust database storage for files and generated notes
 
 
 
